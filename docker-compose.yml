@@ -1,0 +1,42 @@
+version: "3.8"             # <-- re-add version to force the correct schema
+services:
+  db:
+    image: postgres:15
+    container_name: clinicflow_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ergo
+      POSTGRES_PASSWORD: toor123
+      POSTGRES_DB: clinicflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinicflow_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinicflow_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:
+
